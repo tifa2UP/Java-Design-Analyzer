@@ -9,6 +9,10 @@ public class Main {
     }
 
     private double inDepth(Class c){
+        while (c.getSuperclass().getName() != "Object"){
+            c = c.getSuperclass();
+            return 1 + inDepth(c);
+        }
         return 0;
     }
     private double responsibility(Class c){
