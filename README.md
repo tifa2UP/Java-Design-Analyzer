@@ -1,1 +1,3 @@
-# Java-Design-Analyzer
+# A program that analyzes Java applications
+
+##
