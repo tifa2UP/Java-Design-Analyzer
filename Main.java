@@ -7,6 +7,7 @@ import sun.reflect.Reflection;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.lang.Class;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -19,10 +20,24 @@ public class Main {
     Class[] loadedPackage = null;
     String[] classNames= null;
 
-    public static void main(String[] args) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-//        System.out.println("test");
-        Main main = new Main();
-        main.loadPackage("Demo");
+    public void loadPackage(String path) throws IOException {
+        System.out.println("Gathering class files in " + path);
+        FilenameFilter classFilter = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith(".class");
+            }
+        };
+        File f = new File(path); // the directory, really!
+        for (File file : f.listFiles(classFilter) )
+            System.out.println(file.getName());
+    }
+    public static void main(String[] args) throws IOException {
+        FileLoader fl = new FileLoader();
+        if (args.length != 1) {
+            System.out.println("Usage FileLoader <path>");
+        } else {
+            fl.loadPackage(args[0]);
+        }
     }
 
     private double inDepth(Class c) {
@@ -78,28 +93,7 @@ public class Main {
 
     }
 
-    public void loadPackage(String path) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        HashSet packageSet = new HashSet();
-        File[] packageFiles = finder(path);
-        Class[] packageClasses = new Class[packageFiles.length];
-        for (int i = 0; i < packageFiles.length; i++){
-            File f = packageFiles[i];
-            String fileName = f.getName().substring(0, f.getName().length() - 6);
-            packageClasses[i] = Class.forName(fileName);
-        }
-        loadedPackage = packageClasses;
-    }
 
-    private File[] finder(String dirName) {
-        File dir = new File(dirName);
-
-        return dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(".class");
-            }
-        });
-
-    }
 }
 
 
