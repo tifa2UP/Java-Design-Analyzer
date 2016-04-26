@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.Class;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -62,18 +63,29 @@ public class Main {
     private double responsibility(Class c) {
         int clientsNumber = 0;
         for (Class d: loadedPackage){
+            boolean isResponsible = false;
 //            check each method of that class
             for (Method m: d.getMethods()){
                 Class[] params = m.getParameterTypes();
                 for (Class e: params){
                     if (e.getName() == c.getName()){
-                        clientsNumber++;
+                   isResponsible = true;
                         break;
                     }
                 }
             }
+
 //            check the instance variables
-//
+            Field[] fields = d.getFields();
+            for (Field f: fields){
+                if (f.getType().getName() == c.getName()){
+                   isResponsible = true;
+                    break;
+                }
+            }
+            if (isResponsible){
+                clientsNumber++;
+            }
         }
 
         return clientsNumber/loadedPackage.size();
