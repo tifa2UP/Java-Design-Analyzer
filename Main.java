@@ -1,9 +1,6 @@
 /**
  * Created by Abdellatif on 4/23/2016.
  */
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
-import demo.Demo;
-import sun.reflect.Reflection;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -12,15 +9,16 @@ import java.lang.Class;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 
 public class Main {
 
-    Class[] loadedPackage = null;
-    String[] classNames= null;
+    private ArrayList<Class> loadedPackage = new ArrayList<>();
 
-    public void loadPackage(String path) throws IOException {
+
+    public void loadPackage(String path) throws IOException, ClassNotFoundException {
         System.out.println("Gathering class files in " + path);
         FilenameFilter classFilter = new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -28,8 +26,13 @@ public class Main {
             }
         };
         File f = new File(path); // the directory, really!
+        String fileName = "";
         for (File file : f.listFiles(classFilter) )
-            System.out.println(file.getName());
+            fileName = file.getName();
+        fileName.replace(".class", "");
+        fileName = path + "." + fileName;
+        loadedPackage.add(Class.forName(fileName));
+        System.out.println(fileName);
     }
     public static void main(String[] args) throws IOException {
         FileLoader fl = new FileLoader();
@@ -58,17 +61,22 @@ public class Main {
      */
     private double responsibility(Class c) {
         int clientsNumber = 0;
-        for (Method m: c.getMethods()){
-           Type[] mTypes = m.getGenericParameterTypes();
-            for (Type t: mTypes){
-               for (int i = 0; i < classNames.length; i++){
-                   if (t.getTypeName() == classNames[i]){
-                       clientsNumber++;
-                   }
-               }
+        for (Class d: loadedPackage){
+//            check each method of that class
+            for (Method m: d.getMethods()){
+                Class[] params = m.getParameterTypes();
+                for (Class e: params){
+                    if (e.getName() == c.getName()){
+                        clientsNumber++;
+                        break;
+                    }
+                }
             }
+//            check the instance variables
+//
         }
-        return clientsNumber/classNames.length;
+
+        return clientsNumber/loadedPackage.size();
     }
 
     /**
@@ -78,15 +86,17 @@ public class Main {
      (either through inheritance or composition). and #p is the total number of classes.
      */
     private double instability(Class c) {
-       int providersNumber = 0;
+        int providersNumber = 0;
         return providersNumber;
     }
 
     private double workload(Class c) {
+        int packageMethodsNumber = 0;
         Method[] classMethods = c.getMethods();
-//        Method[] packageMethods = loadedPackage.getMethods();
-
-        return classMethods.length;
+        for (Class d: loadedPackage){
+            packageMethodsNumber += d.getMethods().length;
+        }
+        return classMethods.length/packageMethodsNumber;
     }
 
     public void displayMetrics() {
