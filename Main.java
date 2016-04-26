@@ -42,6 +42,8 @@ public class Main {
         } else {
             fl.loadPackage(args[0]);
         }
+        Main main = new Main();
+        main.displayMetrics();
     }
 
     private double inDepth(Class c) {
@@ -99,7 +101,15 @@ public class Main {
      */
     private double instability(Class c) {
         int providersNumber = 0;
-        return providersNumber;
+        //through inheritance:
+        providersNumber += inDepth(c) - 1;
+        Field[] fields = c.getFields();
+        for (Field f: fields){
+                if (loadedPackage.contains(f)){
+                    providersNumber++;
+                }
+        }
+        return providersNumber/loadedPackage.size();
     }
 
     private double workload(Class c) {
@@ -112,7 +122,28 @@ public class Main {
     }
 
     public void displayMetrics() {
+        String[][] displayArray = new String[loadedPackage.size() + 1][5];
+        displayArray[0][0] = "C";
+        displayArray[0][1] = "inDepth(C)";
+        displayArray[0][2] = "inStability(C)";
+        displayArray[0][3] = "responsibility(C)";
+        displayArray[0][4] = "workload(C)";
+        int k = 1;
+        for (Class c: loadedPackage){
+            displayArray[k][0] = c.getName();
+            displayArray[k][1] = "" + Math.round(inDepth(c) * 100.00) / 100.00;
+            displayArray[k][2] = "" + Math.round(instability(c) * 100.00) / 100.00;
+            displayArray[k][3] = "" + Math.round(responsibility(c) * 100.00) / 100.00;
+            displayArray[k][4] = "" + Math.round(workload(c) * 100.00) / 100.00;
+            k++;
+        }
 
+        for (int i = 0; i < displayArray.length; i++){
+            for (int j = 0; j < displayArray[i].length; j++){
+                System.out.printf("%-20s",displayArray[i][j]);
+            }
+            System.out.println();
+        }
     }
 
 
